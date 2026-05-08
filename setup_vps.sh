@@ -46,17 +46,18 @@ pip install -r requirements.txt
 echo "[5/6] spaCy model download..."
 python3 -m spacy download en_core_web_sm || echo "spaCy model download failed — basic tokenizer will be used"
 
-# ── Secrets setup ──
-echo "[6/6] Secrets setup..."
-SECRETS_DIR="$APP_DIR/.streamlit"
-mkdir -p "$SECRETS_DIR"
-if [ ! -f "$SECRETS_DIR/secrets.toml" ]; then
-    echo "OpenAI API key daalo:"
-    read -r API_KEY
-    echo "OPENAI_API_KEY = \"$API_KEY\"" > "$SECRETS_DIR/secrets.toml"
-    echo "secrets.toml created ✓"
+# ── Env file setup ──
+echo "[6/6] Environment setup..."
+if [ ! -f "$APP_DIR/.env" ]; then
+    cp "$APP_DIR/.env.example" "$APP_DIR/.env"
+    echo ""
+    echo "╔══════════════════════════════════════════════════╗"
+    echo "║  .env file bani hai — API key edit karo:         ║"
+    echo "║  nano /opt/qht-video-tools/.env                  ║"
+    echo "╚══════════════════════════════════════════════════╝"
+    echo ""
 else
-    echo "secrets.toml already exists ✓"
+    echo ".env already exists ✓"
 fi
 
 # ── Systemd service ──
@@ -70,6 +71,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/qht-video-tools
+EnvironmentFile=/opt/qht-video-tools/.env
 ExecStart=/opt/qht-video-tools/venv/bin/streamlit run app.py
 Restart=always
 RestartSec=5

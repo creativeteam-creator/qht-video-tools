@@ -1020,12 +1020,15 @@ with tab1:
         use_container_width=True,
     )
 
-    # Load API key from secrets (server-side only)
-    try:
-        api_key = st.secrets["OPENAI_API_KEY"]
-    except Exception:
-        api_key = ""
-        st.error("API key server pe set nahi hai. `.streamlit/secrets.toml` mein daalo.")
+    # Load API key — .env, secrets.toml, ya environment variable
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        try:
+            api_key = st.secrets["OPENAI_API_KEY"]
+        except Exception:
+            pass
+    if not api_key:
+        st.error("API key set nahi hai. `.env` ya `.streamlit/secrets.toml` mein daalo.")
 
     # Validate
     if gen_clicked:

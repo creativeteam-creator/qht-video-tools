@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .streamlit/secrets.toml
+.env
 usage_history.json
 *.log
 .DS_Store
