@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+usage_history.json
+*.log
+.DS_Store
+broll_finder_backup.py
+Windows/
+.claude/
