@@ -855,26 +855,31 @@ with st.sidebar:
 
     st.divider()
     st.subheader("📁 B-Roll Library")
-    library_path = st.text_input("Mac Library Path", value=DEFAULT_LIBRARY)
+    library_path = st.text_input("Library Path", value=DEFAULT_LIBRARY)
     max_results  = st.slider("Max B-roll results", 1, 30, 10)
 
-    st.caption("Windows Network Path Settings")
-    nas_mac_prefix = st.text_input(
-        "Mac NAS mount prefix",
-        value=DEFAULT_MAC_PREFIX,
-        help="Mac pe NAS kahan mount hai, e.g. /Volumes/PHOTOGRAPHY",
-    )
-    nas_win_prefix = st.text_input(
-        "Windows UNC prefix",
-        value=DEFAULT_WIN_PREFIX,
-        help=r"Windows pe NAS ka UNC path, e.g. \\192.168.1.100\PHOTOGRAPHY",
-    )
-
-    if st.button("🔄 Rescan Library", use_container_width=True):
-        scan_library.clear()
-        st.session_state.broll_results = []
-        st.session_state.broll_keywords = []
-        st.success("Cache cleared — next generate pe rescan hoga")
+    if os.path.isdir(library_path):
+        st.success("Library connected ✓")
+        st.caption("Windows Network Path Settings")
+        nas_mac_prefix = st.text_input(
+            "Mac NAS mount prefix",
+            value=DEFAULT_MAC_PREFIX,
+            help="Mac pe NAS kahan mount hai, e.g. /Volumes/PHOTOGRAPHY",
+        )
+        nas_win_prefix = st.text_input(
+            "Windows UNC prefix",
+            value=DEFAULT_WIN_PREFIX,
+            help=r"Windows pe NAS ka UNC path, e.g. \\192.168.1.100\PHOTOGRAPHY",
+        )
+        if st.button("🔄 Rescan Library", use_container_width=True):
+            scan_library.clear()
+            st.session_state.broll_results = []
+            st.session_state.broll_keywords = []
+            st.success("Cache cleared")
+    else:
+        nas_mac_prefix = DEFAULT_MAC_PREFIX
+        nas_win_prefix = DEFAULT_WIN_PREFIX
+        st.caption("Library not found — B-Roll features disabled on this server")
 
     st.divider()
     try:
@@ -923,11 +928,16 @@ with tab2:
         key="solo_btn",
     )
 
+    # Library available check
+    _lib_available = os.path.isdir(library_path)
+    if not _lib_available:
+        st.info("B-Roll library available nahi hai is server pe. Sirf Script Generator use karo.")
+
     if solo_clicked:
         if not solo_text.strip():
             st.warning("Kuch text ya keywords daalo pehle!")
-        elif not os.path.isdir(library_path):
-            st.error(f"Library path nahi mili: `{library_path}`")
+        elif not _lib_available:
+            st.warning("B-Roll library is server pe accessible nahi hai.")
         else:
             with st.spinner("Keywords nikal rahe hain…"):
                 solo_kws = extract_keywords_spacy(solo_text)
@@ -1153,7 +1163,7 @@ with tab1:
                     st.session_state.broll_results  = matches
                     st.session_state.open_status    = {}
                 else:
-                    st.warning(f"Library path nahi mili:\n`{library_path}`")
+                    st.info("B-Roll library is server pe available nahi — sirf script output milega.")
 
             if st.session_state.broll_keywords:
                 with st.expander(
